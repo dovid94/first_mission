@@ -8,28 +8,43 @@ PORT = 5001
 
 
 def server():
-    new_file = []
+    name = get_name()
     with socket.socket() as s:
-        s.bind((IP, PORT))
+        s.bind((IP, 6000))
         s.listen()
         conn, addr = s.accept()
         print('connected by', addr)
-        data = conn.recv(1024)
-        new_file.append(data)
-        print(new_file)
-        conn.sendall(data)
-    return new_file
+        while True:
+            data = conn.recv(1024)
+            save_file(data, name)
+            conn.sendall(data)
+            if not data:
+                break
+        s.close()
+    return data
 
 
-def save_file(fil, f_name):
-    f = open(f_name, "w")
-    f.write(fil)
+def save_file(fil, name):
+    print(type(fil), fil) 
+    with open(name, "ab") as new_file:
+        new_file.write(fil)
+
+
+def get_name():
+    s = socket.socket()
+    s.bind((IP, PORT))
+    s.listen()
+    conn, addr = s.accept()
+    name = conn.recv(1024)
+    the_name = name
+    conn.sendall(name)
+    s.close()
+    return the_name
 
 
 def run():
-    f = server()
-    f_name = server()
-    save_file(f, f_name)
+    stuff = server()
+    save_file(stuff)
 
 
 if __name__ == "__main__":
