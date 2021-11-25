@@ -9,29 +9,42 @@ PORT2 = 5002
 
 
 def get_s():
+    """returns a connected socket"""
     s = socket.socket()
     s.connect((IP, PORT2))
     return s
 
 
 def sender():
+    """puts the messages in a list and sends them to the server"""
     unsent_msg = []
     while True:
-        unsent_msg.append(input())
-        try:
-            while True:
-                s = get_s()
-                s.sendall(str.encode(unsent_msg.pop(0)))
-                data = s.recv(1024)
-                s.close
-        except ConnectionRefusedError:
-            time.sleep(1)
-            continue
-        except IndexError:
-            s.close
+        if connection_tester() == True:
+            unsent_msg.append(input())
+            while len(unsent_msg) > 0:
+                try:
+                    s = get_s()
+                    s.sendall(str.encode(unsent_msg.pop(0)))
+                    data = s.recv(1024)
+                    s.close()
+                except:
+                    continue
+        elif connection_tester == False:
+            unsent_msg.append(input())
+
+
+def connection_tester():
+    """checks if the server is connected"""
+    try:
+        s = get_s()
+        s.close()
+        return True
+    except ConnectionRefusedError:
+        return False
 
 
 def reciever():
+    """establishes a server and prints the messages"""
     s = socket.socket()
     s.bind((IP, PORT1))
     s.listen()
